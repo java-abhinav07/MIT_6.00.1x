@@ -1,4 +1,4 @@
-from ps4a import *
+import ps4a
 import time
 
 
@@ -23,6 +23,14 @@ def compChooseWord(hand, wordList, n):
 
     returns: string or None
     """
+    bestscore = 0
+    bestword = None
+    for word in wordList:
+        if ps4a.isValidWord(word, hand, wordList):
+            if ps4a.getWordScore(word, n) > bestscore:
+                bestscore = ps4a.getWordScore(word, n)
+                bestword = word
+    return bestword
     
 
 #
@@ -47,12 +55,24 @@ def compPlayHand(hand, wordList, n):
     wordList: list (string)
     n: integer (HAND_SIZE; i.e., hand size required for additional points)
     """
-
+    total = 0
     
-#
-# Problem #6: Playing a game
-#
-#
+    while True:
+        
+        if not ps4a.calculateHandlen(hand) or not compChooseWord(hand, wordList, n):
+            print("Total score: {} points.".format(total))
+            return 
+        
+        print("Current Hand: ", end="")
+        ps4a.displayHand(hand)
+        for word in wordList:
+            if ps4a.isValidWord(word, hand, wordList):
+                score = ps4a.getWordScore(word, n)
+                total += score
+                print('"{}" earned {}  points. Total:  {}  points'.format(word, score, total))
+                hand = ps4a.updateHand(hand, word)
+                
+
 def playGame(wordList):
     """
     Allow the user to play an arbitrary number of hands.
@@ -77,15 +97,49 @@ def playGame(wordList):
 
     wordList: list (string)
     """
-    # TO DO... <-- Remove this comment when you code this function
-    print("playGame not yet implemented.") # <-- Remove this when you code this function
+    progcounter = 0
+    while True:
+        userin = input("Enter n to deal a new hand, r to replay the last hand, or e to end game: ")
+    
+        if userin == 'e':
+            return
+        elif userin == 'n':
+            hand = ps4a.dealHand(ps4a.HAND_SIZE)
+            choice(hand, wordList)
+            progcounter += 1
+        
+        elif progcounter == 0 and userin == 'r':
+            print("You have not played a hand yet. Please play a new hand first!")
+        elif progcounter > 0 and userin == 'r':
+            choice(hand, wordList)
+            
+        else: 
+            print("Invalid command.")
+        
+
+def choice(hand, wordList):
+    """ Helps the user choose whether to play themselves or have the computer play"""
+    while True:
+        comp = input("Enter u to have yourself play, c to have the computer play: ")
+        if comp == 'u':
+            ps4a.playHand(hand, wordList, ps4a.HAND_SIZE)
+            break
+        elif comp == 'c':
+            compPlayHand(hand, wordList, ps4a.HAND_SIZE)
+            break
+        else:
+            print("Invalid command.")
+    return 
+    
+    
+                
 
         
 #
 # Build data structures used for entire session and play game
 #
 if __name__ == '__main__':
-    wordList = loadWords()
+    wordList = ps4a.loadWords()
     playGame(wordList)
 
 
